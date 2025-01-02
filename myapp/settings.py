@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-uckhxo7d82!k==^$j5i-mtwuq71()bwube7kumpcrbk99v8((n
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
+CSRF_TRUSTED_ORIGINS = ["https://calorie-traffic.onrender.com"]
 
 # Application definition
 
