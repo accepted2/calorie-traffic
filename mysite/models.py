@@ -15,6 +15,11 @@ class Food(models.Model):
 
 
 class Consume(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    food_consumed = models.ForeignKey(Food, on_delete=models.CASCADE, default=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True
+    )  # Добавлено null=True, blank=True
+    food_consumed = models.ForeignKey(Food, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user} consumed {self.food_consumed.name}"

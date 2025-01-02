@@ -1,8 +1,10 @@
 from django.shortcuts import redirect, render
 from .models import Food, Consume
-
+from django.contrib.auth.models import AnonymousUser
 
 # Create your views here.
+
+
 def index(request):
     foods = Food.objects.all()
     total_carbs = 0
@@ -10,8 +12,14 @@ def index(request):
     total_calories = 0
     total_fats = 0
 
+    # Если пользователь анонимный, мы не используем его как ссылку на пользователя, а просто None
+    user = request.user if request.user.is_authenticated else None
+
     # Получаем все потребленные продукты для текущего пользователя
-    consumed_food = Consume.objects.filter(user=request.user)
+    if user:  # Если пользователь аутентифицирован
+        consumed_food = Consume.objects.filter(user=user)
+    else:  # Если пользователь анонимный, фильтруем только по None
+        consumed_food = Consume.objects.filter(user=None)
 
     # Подсчёт общих макронутриентов
     for consumption in consumed_food:
@@ -35,12 +43,12 @@ def index(request):
     if request.method == "POST":
         food_ids = request.POST.getlist(
             "food_consumed"
-        )  # Изменено на getlist для получения всех выбранных ID
+        )  # Получаем все выбранные ID продуктов
 
         for food_id in food_ids:
             food_item = Food.objects.get(id=food_id)
             consume = Consume(
-                user=request.user, food_consumed=food_item, quantity=1
+                user=user, food_consumed=food_item, quantity=1
             )  # Создание новой записи
             consume.save()
 
@@ -51,8 +59,11 @@ def index(request):
 
 def delete_consume(request, pk):
     try:
+        # Используем None для анонимных пользователей
+        user = request.user if request.user.is_authenticated else None
+
         # Найти объект Consume по его ID и пользователю
-        consume_food = Consume.objects.get(id=pk, user=request.user)
+        consume_food = Consume.objects.get(id=pk, user=user)
 
         if request.method == "POST":
             consume_food.delete()  # Удалить запись
